@@ -1,0 +1,41 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.x
+    commands:
+      - echo Entered the INSTAL phase
+      - echo something something
+      - yum update -y
+      - yum install jq git -y -q
+  pre_build:
+    commands:
+      - echo Entered the pre_build phase...
+      - echo Current directory is $CODEBUILD_SRC_DIR
+      - "export dirname=${PWD##*/}"
+      - echo Directory name $dirname
+      - echo Installing packeges using pip3...
+      - pip install -r src/dev-requirements.txt
+      - pylint --version
+      - pytest --version
+      - bandit --version
+  build:
+    commands:
+      - echo "====================="
+      - echo "Checking Python code for syntax errors ..."
+      - pylint --errors-only src/*.py
+      - echo "Checking Python code for syntax suggestions ..."
+      - pylint --exit-zero src/*.py
+      - echo "Static code security analysis ..."
+      - bandit src/*.py
+      - echo Unit testing
+      - python -m pytest -s -vvv tests/unit/ --junitxml=reports/unit.xml
+  post_build:
+    commands:
+      - echo "====================="
+      - echo project was successfully built and packaged in s3 bucket - $S3_BUCKET_NAME
+reports:
+  pytest-reports:
+    files:
+      - "**/*"
+    base-directory: "reports"

@@ -1,0 +1,29 @@
+========================================================================================================
+
+  cat help                Prints this message
+
+  Initialize:
+    terraform init
+    terraform workspace select $env_name || terraform workspace new $env_name
+
+  Formate:
+    terraform fmt -recursive ./ 
+
+  Validate:
+    terraform validate 
+
+  Lint:
+    tflint --init
+
+  Seclint:
+    checkov --directory .
+  
+  Docs:
+    terraform-docs markdown table --output-file README.md --output-mode inject .
+
+  Plan:
+    terraform plan -out plan.out
+  
+  Apply: 
+    terraform apply plan.out
+========================================================================================================

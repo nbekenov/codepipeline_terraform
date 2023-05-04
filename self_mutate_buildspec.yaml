@@ -1,0 +1,49 @@
+version: 0.2
+env:
+  shell: bash
+  variables:
+    TERRAFORM_VERSION: 1.2.8
+    CHECKOV_VERSION: 2.2.125
+    TFLINT_VERSION: 0.39.1
+    TFLINT_AWS_RULESET_VERSION: 0.15.0
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo Entered the INSTALL phase
+      - yum update -y
+      - yum install jq git -y -q
+      - yum install -y -q ca-certificates curl less unzip py-pip && rm -rf /var/cache/yum/*
+      - pip install pip --upgrade
+      - aws configure set default.region $AWS_DEFAULT_REGION
+      - mkdir -p ~/.tflint.d/plugins
+      # install Terraform, Checkov and TFLint
+      - >
+        pushd /usr/local/bin &&
+        curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip &&
+        unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip &&
+        rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+      - pip install checkov==${CHECKOV_VERSION}
+      - >
+        curl --location https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip --output tflint_linux_amd64.zip &&
+        unzip tflint_linux_amd64.zip &&
+        rm tflint_linux_amd64.zip
+      - >
+        curl --location https://github.com/terraform-linters/tflint-ruleset-aws/releases/download/v${TFLINT_AWS_RULESET_VERSION}/tflint-ruleset-aws_linux_amd64.zip --output tflint-ruleset-aws.zip &&
+        unzip tflint-ruleset-aws.zip -d ~/.tflint.d/plugins &&
+        rm tflint-ruleset-aws.zip
+  pre_build:
+    commands:
+      - echo "====================="
+      - echo Entered the pre_build phase...
+      - terraform --version
+      - checkov --version
+      - tflint --version
+  build:
+    commands:
+  build:
+    commands:
+      - echo "====================="
+      - cd $CODEBUILD_SRC_DIR
+      - scripts/self_mutate.sh "infrastructure/pipeline"

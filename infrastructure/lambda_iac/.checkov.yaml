@@ -1,0 +1,8 @@
+download-external-modules: true
+evaluate-variables: true
+external-modules-download-path: .external_modules
+framework: terraform
+output: cli
+skip-check:
+  - CKV_AWS_173
+  - CKV_AWS_272
